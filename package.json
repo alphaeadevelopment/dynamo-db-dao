@@ -1,0 +1,28 @@
+{
+  "name": "@alphaeadev/dynamo-db-dao",
+  "version": "1.0.5",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack"
+  },
+  "keywords": [],
+  "author": "Graham King <gking2224@gmail.com>",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-minify": "^0.2.0",
+    "babel-preset-stage-0": "^6.24.1",
+    "webpack": "^3.10.0"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.184.0"
+  },
+  "peerDependencies": {
+    "aws-sdk": "^2.184.0",
+    "uuid": "^3.2.1"
+  }
+}
