@@ -61,7 +61,7 @@ export default class DynamoDbDataAccess {
       })
     });
   }
-  getAll(limit = 0, pageKey) {
+  getAll(limit, pageKey) {
     return new Promise((res, rej) => {
       const params = {
         TableName: this.tablename,
