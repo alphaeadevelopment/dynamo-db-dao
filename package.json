@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "deploy": "npm version patch && git push --tags && npm run build && npm publish",
-    "build": "webpack"
+    "build": "NODE_ENV=production webpack"
   },
   "keywords": [],
   "author": "Graham King <gking2224@gmail.com>",
