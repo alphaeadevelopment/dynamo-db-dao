@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy": "npm version patch && git push --tags && npm run build && npm publish",
     "build": "webpack"
   },
   "keywords": [],
@@ -19,7 +20,7 @@
     "webpack": "^3.10.0"
   },
   "dependencies": {
-    "aws-sdk": "^2.184.0"
+    "aws-sdk": "^2.185.0"
   },
   "peerDependencies": {
     "aws-sdk": "^2.184.0",
