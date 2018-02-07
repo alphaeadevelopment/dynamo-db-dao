@@ -11,6 +11,7 @@ export default class DynamoDbDataAccess {
     this.pk = pk;
   }
   itemToObject(d) {
+    if (!d) return null;
     const rv = {}
     for (let v in this.schema) {
       const type = this.schema[v];

@@ -25,5 +25,8 @@
   "peerDependencies": {
     "aws-sdk": "^2.184.0",
     "uuid": "^3.2.1"
+  },
+  "publishConfig": {
+    "registry": "http://proliant:8081/repository/npm-releases/"
   }
 }
