@@ -10,6 +10,13 @@ export default class DynamoDbDataAccess {
     this.tablename = tablename;
     this.pk = pk;
   }
+  typedValue(key, value) {
+    const type = this.schema[key];
+    return ({ [type]: value });
+  }
+  fieldFromValue(key, value) {
+    return ({ [key]: this.typedValue(key, value) });
+  }
   itemToObject(d) {
     if (!d) return null;
     const rv = {}
@@ -22,7 +29,7 @@ export default class DynamoDbDataAccess {
   objectToItem(d) {
     const i = {};
     for (let v in this.schema) {
-      i[v] = { [this.schema[v]]: d[v] }
+      i[v] = this.typedValue(v, d[v]);
     }
     return i;
   }
@@ -40,10 +47,6 @@ export default class DynamoDbDataAccess {
         else res(this.itemToObject(Item));
       })
     });
-  }
-  fieldFromValue(key, value) {
-    const type = this.schema[key];
-    return ({ [key]: { [type]: value } });
   }
   valueFromField(field, key) {
     const type = this.schema[key];
@@ -92,6 +95,20 @@ export default class DynamoDbDataAccess {
         if (err) rej(err);
         else res(data);
       })
+    });
+  }
+  findByQuery(query, queryParameters, index) {
+    return new Promise((res, rej) => {
+      const params = {
+        IndexName: index,
+        ExpressionAttributeValues: queryParams,
+        KeyConditionExpression: query,
+        TableName: this.tablename,
+      };
+      dynamodb.query(params, (e, data) => {
+        if (e) rej(e);
+        else res({ items: data.Items.map(i => this.itemToObject(i)) });
+      });
     });
   }
 }
