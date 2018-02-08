@@ -101,7 +101,7 @@ export default class DynamoDbDataAccess {
     return new Promise((res, rej) => {
       const params = {
         IndexName: index,
-        ExpressionAttributeValues: queryParams,
+        ExpressionAttributeValues: queryParameters,
         KeyConditionExpression: query,
         TableName: this.tablename,
       };
