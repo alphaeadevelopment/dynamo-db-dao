@@ -1,0 +1,114 @@
+{
+  "stats": {
+    "suites": 2,
+    "tests": 1,
+    "passes": 1,
+    "pending": 0,
+    "failures": 0,
+    "start": "2018-02-09T17:45:32.094Z",
+    "end": "2018-02-09T17:45:32.106Z",
+    "duration": 12,
+    "testsRegistered": 1,
+    "passPercent": 100,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 0,
+    "hasSkipped": false,
+    "passPercentClass": "success",
+    "pendingPercentClass": "danger"
+  },
+  "suites": {
+    "uuid": "e128084c-f819-4063-9d81-05880b70e3bd",
+    "title": "",
+    "fullFile": "",
+    "file": "",
+    "beforeHooks": [],
+    "afterHooks": [],
+    "tests": [],
+    "suites": [
+      {
+        "uuid": "4196b622-11e9-4288-8a6c-8c8f7e23aa83",
+        "title": "dynamo db dao",
+        "fullFile": "/Users/gk/Development/prm/dynamo-db-dao/.tmp/mocha-webpack/1518197253528/bundle.js",
+        "file": "/.tmp/mocha-webpack/1518197253528/bundle.js",
+        "beforeHooks": [],
+        "afterHooks": [],
+        "tests": [],
+        "suites": [
+          {
+            "uuid": "6217551d-c78c-494a-abac-c0cb7bfe238d",
+            "title": "update",
+            "fullFile": "/Users/gk/Development/prm/dynamo-db-dao/.tmp/mocha-webpack/1518197253528/bundle.js",
+            "file": "/.tmp/mocha-webpack/1518197253528/bundle.js",
+            "beforeHooks": [
+              {
+                "title": "\"before each\" hook",
+                "fullTitle": "dynamo db dao update \"before each\" hook",
+                "timedOut": false,
+                "duration": 0,
+                "pass": false,
+                "fail": false,
+                "pending": false,
+                "code": "putItemStub.reset();",
+                "err": {},
+                "isRoot": false,
+                "uuid": "2bbb260a-3632-4a32-bd46-d43e30ba83b6",
+                "isHook": true,
+                "skipped": false
+              }
+            ],
+            "afterHooks": [],
+            "tests": [
+              {
+                "title": "calls update with correct schema",
+                "fullTitle": "dynamo db dao update calls update with correct schema",
+                "timedOut": false,
+                "duration": 8,
+                "state": "passed",
+                "speed": "fast",
+                "pass": true,
+                "fail": false,
+                "pending": false,
+                "code": "var dao = new DummyDao('Dummy', simpleSchema, { dynamodb: dynamodb });\nvar object = { id: '123', number: 123 };\nvar expected = {\n  TableName: 'Dummy',\n  Item: { id: { 'S': '123' }, number: { 'N': 123 } }\n};\nvar rv = 1;\nputItemStub.callsArgWith(1, null, rv);\ndao.putItem('123', object).then(function (d) {\n  (0, _chai.expect)(putItemStub).to.have.been.calledWith(expected);\n  (0, _chai.expect)(d).to.equal(rv);\n  done();\n}).catch(function (e) {\n  done(e);\n});",
+                "err": {},
+                "isRoot": false,
+                "uuid": "ce874e17-e495-4eda-ad30-3e96e2dbd54a",
+                "isHook": false,
+                "skipped": false
+              }
+            ],
+            "suites": [],
+            "passes": [
+              "ce874e17-e495-4eda-ad30-3e96e2dbd54a"
+            ],
+            "failures": [],
+            "pending": [],
+            "skipped": [],
+            "duration": 8,
+            "root": false,
+            "rootEmpty": false,
+            "_timeout": 2000
+          }
+        ],
+        "passes": [],
+        "failures": [],
+        "pending": [],
+        "skipped": [],
+        "duration": 0,
+        "root": false,
+        "rootEmpty": false,
+        "_timeout": 2000
+      }
+    ],
+    "passes": [],
+    "failures": [],
+    "pending": [],
+    "skipped": [],
+    "duration": 0,
+    "root": true,
+    "rootEmpty": true,
+    "_timeout": 2000
+  },
+  "copyrightYear": 2018
+}
