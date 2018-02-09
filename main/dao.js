@@ -5,10 +5,11 @@ const id = uuid();
 
 const dynamodb = new AWS.DynamoDB({ region: 'eu-west-1' });
 export default class DynamoDbDataAccess {
-  constructor(tablename, schema, pk = 'id', pkType = 'S') {
+  constructor(tablename, schema, pk = 'id', sortKey) {
     this.schema = schema;
     this.tablename = tablename;
     this.pk = pk;
+    this.sortKey = sortKey;
   }
   typedValue(key, value) {
     const type = this.schema[key];
@@ -52,11 +53,15 @@ export default class DynamoDbDataAccess {
     const type = this.schema[key];
     return field[type];
   }
-  getById(id) {
+  getById(id, sortKey) {
     return new Promise((res, rej) => {
       const pk = this.pk;
+      const keys = this.fieldFromValue(this.pk, id);
+      if (sortKey) {
+        keys[this.sortKey] = this.typedValue(this.sortKey, sortKey);
+      }
       const params = {
-        Key: this.fieldFromValue(this.pk, id),
+        Key: keys,
         TableName: this.tablename,
       }
       dynamodb.getItem(params, (err, data) => {
