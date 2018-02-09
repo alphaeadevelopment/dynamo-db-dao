@@ -46,7 +46,7 @@ describe('dynamo db dao', () => {
     });
     it('converts number', () => {
       const dao = new DummyDao('Dummy', simpleSchema);
-      expect(dao.typedValue('number', 123)).to.deep.equal({ 'N': 123 });
+      expect(dao.typedValue('number', '123')).to.deep.equal({ 'N': '123' });
     });
     it('converts list of string', () => {
       const dao = new DummyDao('Dummy', simpleList);
@@ -78,9 +78,9 @@ describe('dynamo db dao', () => {
   describe('objectToTypedItem', () => {
     it('converts simple object', () => {
       const dao = new DummyDao('Dummy', simpleSchema);
-      const object = { id: '123', number: 123 };
+      const object = { id: '123', number: '123' };
       const expected = {
-        id: { 'S': '123' }, number: { 'N': 123 }
+        id: { 'S': '123' }, number: { 'N': '123' }
       };
       expect(dao.objectToTypedItem(object)).to.deep.equal(expected);
     });
@@ -101,16 +101,16 @@ describe('dynamo db dao', () => {
       expect(dao.objectToTypedItem(object)).to.deep.equal(expected);
     });
   });
-  describe.only('update', () => {
+  describe('update', () => {
     beforeEach(() => {
       putItemStub.reset();
     })
     it('calls update with correct schema', (done) => {
       const dao = new DummyDao('Dummy', simpleSchema, { dynamodb });
-      const object = { id: '123', number: 123 };
+      const object = { id: '123', number: '123' };
       const expected = {
         TableName: 'Dummy',
-        Item: { id: { 'S': '123' }, number: { 'N': 123 } }
+        Item: { id: { 'S': '123' }, number: { 'N': '123' } }
       };
       const rv = 1;
       putItemStub.callsArgWith(1, null, rv);

@@ -47,8 +47,6 @@ export default class DynamoDbDataAccess {
     let value;
     switch (type) {
       case 'N':
-        value = Number(v);
-        break;
       case 'S':
       default:
         value = v;
