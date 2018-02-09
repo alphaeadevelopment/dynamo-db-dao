@@ -1,5 +1,6 @@
 import AWS from 'aws-sdk';
 import uuid from 'uuid/v1';
+import keys from 'lodash/keys';
 
 const id = uuid();
 
@@ -17,29 +18,38 @@ export default class DynamoDbDataAccess {
     this.dynamodb = dynamodb;
   }
   typedValue(key, value, schema = this.schema) {
-    console.log('--> typedValue of %s:%s using schema %s', JSON.stringify(key), JSON.stringify(value), JSON.stringify(schema));
     const type = schema[key];
-    console.log(typeof type);
     if (typeof type === 'object') {
-      console.log('complex')
       const rv = ({ [type.type]: this.objectToTypedItem(value, type) });
-      console.log('<-- typedValue %s', JSON.stringify(rv))
       return rv;
     }
     const rv = ({ [type]: value });
-    console.log('<-- typedValue %s', JSON.stringify(rv));
     return rv;
   }
   fieldFromValue(key, value) {
     return ({ [key]: this.typedValue(key, value) });
   }
-  itemToObject(d, schema = this.schema) {
+  itemToValue(item) {
+    const type = keys(item)[0];
+    const value = item[type];
+    switch (type) {
+      case 'S':
+        return value;
+      case 'N':
+        return Number(value);
+      case 'M':
+        return this.typedItemToObject(value);
+      case 'L':
+        return value.map(v => this.itemToValue(v));
+      default:
+        return item;
+    }
+  }
+  typedItemToObject(d) {
     if (!d) return null;
     const rv = {}
-    for (let v in schema) {
-      console.log('handle %s', v);
-      const type = schema[v];
-      rv[v] = d[v] && d[v][type];
+    for (let v in d) {
+      rv[v] = this.itemToValue(d[v]);
     }
     return rv;
   }
@@ -54,12 +64,9 @@ export default class DynamoDbDataAccess {
     return ({ [type]: value });
   }
   objectToTypedItem(d, schema = this.schema) {
-    console.log('--> objectToTypedItem %s schema %s', JSON.stringify(d), JSON.stringify(schema));
     let rv;
     if (d instanceof Array) {
-      console.log('array');
       const arraySchema = schema.schema;
-      console.log('arraySchema', arraySchema);
       if (typeof arraySchema === 'object') {
         rv = d.map(i => ({ 'M': this.objectToTypedItem(i, schema.schema) }));
       }
@@ -73,11 +80,9 @@ export default class DynamoDbDataAccess {
     else if (typeof d === 'object') {
       rv = {};
       for (let v in schema) {
-        console.log('schema item %s', v);
         rv[v] = this.typedValue(v, d[v], schema);
       }
     }
-    console.log('<-- objectToTypedItem %s', JSON.stringify(rv));
     return rv;
   }
   add(d) {
@@ -91,7 +96,7 @@ export default class DynamoDbDataAccess {
       }
       this.dynamodb.putItem(params, (err, data) => {
         if (err) rej(err);
-        else res(this.itemToObject(Item));
+        else res(this.typedItemToObject(Item));
       })
     });
   }
@@ -112,7 +117,7 @@ export default class DynamoDbDataAccess {
       }
       this.dynamodb.getItem(params, (err, data) => {
         if (err) rej(err);
-        else res(this.itemToObject(data.Item, this.schema));
+        else res(this.typedItemToObject(data.Item, this.schema));
       })
     });
   }
@@ -130,7 +135,7 @@ export default class DynamoDbDataAccess {
         }
         const pk = this.pk;
         const paginationKey = data.LastEvaluatedKey ? this.valueFromField(data.LastEvaluatedKey[pk], pk) : null;
-        res({ paginationKey, items: data.Items.map(i => this.itemToObject(i, this.schema)) });
+        res({ paginationKey, items: data.Items.map(i => this.typedItemToObject(i, this.schema)) });
       })
     });
   }
@@ -141,7 +146,6 @@ export default class DynamoDbDataAccess {
         TableName: this.tablename,
         Key: this.objectToTypedItem({ ...d, [pk]: id }),
       }
-      console.log(params);
       this.dynamodb.updateItem(params, (err, data) => {
         console.log(err, data);
         if (err) rej(err);
@@ -156,9 +160,7 @@ export default class DynamoDbDataAccess {
         TableName: this.tablename,
         Item: this.objectToTypedItem({ ...d, [pk]: id }),
       }
-      console.log(params);
       this.dynamodb.putItem(params, (err, data) => {
-        console.log(err, data);
         if (err) rej(err);
         else res(data);
       })
@@ -174,7 +176,7 @@ export default class DynamoDbDataAccess {
       };
       this.dynamodb.query(params, (e, data) => {
         if (e) rej(e);
-        else res({ items: data.Items.map(i => this.itemToObject(i)) });
+        else res({ items: data.Items.map(i => this.typedItemToObject(i)) });
       });
     });
   }

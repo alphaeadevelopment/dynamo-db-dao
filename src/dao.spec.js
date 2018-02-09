@@ -92,7 +92,7 @@ describe('dynamo db dao', () => {
       };
       expect(dao.objectToTypedItem(object)).to.deep.equal(expected);
     });
-    it('converts complex list', () => {
+    it('converts list of object', () => {
       const dao = new DummyDao('Dummy', complexList);
       const object = { id: '123', list: [{ name: 'Bob' }] };
       const expected = {
@@ -101,11 +101,11 @@ describe('dynamo db dao', () => {
       expect(dao.objectToTypedItem(object)).to.deep.equal(expected);
     });
   });
-  describe('update', () => {
+  describe('putItem', () => {
     beforeEach(() => {
       putItemStub.reset();
     })
-    it('calls update with correct schema', (done) => {
+    it('calls putItem with correct schema', (done) => {
       const dao = new DummyDao('Dummy', simpleSchema, { dynamodb });
       const object = { id: '123', number: '123' };
       const expected = {
@@ -123,6 +123,33 @@ describe('dynamo db dao', () => {
         .catch(e => {
           done(e)
         });
+    });
+  });
+  describe('typedItemToObject', () => {
+    it('converts to simple object', () => {
+      const dao = new DummyDao('Dummy', simpleSchema, { dynamodb });
+      const expected = { id: '123', number: 123 };
+      const typedItem = {
+        id: { 'S': '123' },
+        number: { 'N': '123' },
+      };
+      expect(dao.typedItemToObject(typedItem)).to.deep.equal(expected);
+    });
+    it('converts to list of string', () => {
+      const dao = new DummyDao('Dummy', simpleList, { dynamodb });
+      const expected = { id: '123', list: ['123'] };
+      const typedItem = {
+        id: { 'S': '123' }, list: { 'L': [{ 'S': '123' }] }
+      };
+      expect(dao.typedItemToObject(typedItem)).to.deep.equal(expected);
+    });
+    it('converts to list of object', () => {
+      const dao = new DummyDao('Dummy', complexList, { dynamodb });
+      const expected = { id: '123', list: [{ name: 'Bob' }] };
+      const typedItem = {
+        id: { 'S': '123' }, list: { 'L': [{ 'M': { name: { 'S': 'Bob' } } }] }
+      };
+      expect(dao.typedItemToObject(typedItem)).to.deep.equal(expected);
     });
   });
 });
