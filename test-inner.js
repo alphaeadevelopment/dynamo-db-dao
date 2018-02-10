@@ -28,8 +28,9 @@ class DummyDao extends DynamoDao {
 }
 
 const dao = new DummyDao('Dummy', complexList);
-const expected = { id: '123', list: [{ name: 'Bob' }] };
-const typedItem = {
-  id: { 'S': '123' }, list: { 'L': [{ 'M': { name: { 'S': 'Bob' } } }] }
-};
-console.log(dao.typedItemToObject(typedItem));
+const object = { id: '123', people: { 'bobj': { firstName: 'Bob', surname: 'Jenkins' } } };
+// const typedItem = {
+//   id: { 'S': '123' }, people: { 'M': [{ 'M': { name: { 'S': 'Bob' } } }] }
+// };
+console.log(dao.objectToTypedItem(object));
+// console.log(dao.typedItemToObject(typedItem));

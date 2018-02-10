@@ -84,6 +84,30 @@ describe('dynamo db dao', () => {
       };
       expect(dao.objectToTypedItem(object)).to.deep.equal(expected);
     });
+    it('converts Number to N:string', () => {
+      const dao = new DummyDao('Dummy', simpleSchema);
+      const object = { id: '123', number: 123 };
+      const expected = {
+        id: { 'S': '123' }, number: { 'N': '123' }
+      };
+      expect(dao.objectToTypedItem(object)).to.deep.equal(expected);
+    });
+    it('converts undefined to N:\'\'', () => {
+      const dao = new DummyDao('Dummy', simpleSchema);
+      const object = { id: '123' };
+      const expected = {
+        id: { 'S': '123' }, number: { 'N': '' }
+      };
+      expect(dao.objectToTypedItem(object)).to.deep.equal(expected);
+    });
+    it('converts undefined to S:\'\'', () => {
+      const dao = new DummyDao('Dummy', simpleSchema);
+      const object = { number: 123 };
+      const expected = {
+        id: { 'S': '' }, number: { 'N': '123' }
+      };
+      expect(dao.objectToTypedItem(object)).to.deep.equal(expected);
+    });
     it('converts simple list', () => {
       const dao = new DummyDao('Dummy', simpleList);
       const object = { id: '123', list: ['123'] };

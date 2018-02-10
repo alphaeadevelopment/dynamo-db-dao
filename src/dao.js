@@ -23,7 +23,16 @@ export default class DynamoDbDataAccess {
       const rv = ({ [type.type]: this.objectToTypedItem(value, type) });
       return rv;
     }
-    const rv = ({ [type]: value });
+    let typedValue;
+    switch (type) {
+      case 'S':
+      case 'N':
+        typedValue = `${value || ''}`;
+        break;
+      default:
+        typedValue = value;
+    }
+    const rv = ({ [type]: typedValue });
     return rv;
   }
   fieldFromValue(key, value) {
