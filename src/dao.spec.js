@@ -124,6 +124,30 @@ describe('dynamo db dao', () => {
       };
       expect(dao.objectToTypedItem(object)).to.deep.equal(expected);
     });
+    it('converts list of numbers', () => {
+      const dao = new DummyDao('Dummy', { id: 'S', list: { type: 'L', schema: 'N' } });
+      const object = { id: '123', list: [1] };
+      const expected = {
+        id: { 'S': '123' }, list: { 'L': [{ 'N': '1' }] }
+      };
+      expect(dao.objectToTypedItem(object)).to.deep.equal(expected);
+    });
+    it('converts list of null string', () => {
+      const dao = new DummyDao('Dummy', { id: 'S', list: { type: 'L', schema: 'S' } });
+      const object = { id: '123', list: [null] };
+      const expected = {
+        id: { 'S': '123' }, list: { 'L': [{ 'S': '' }] }
+      };
+      expect(dao.objectToTypedItem(object)).to.deep.equal(expected);
+    });
+    it('converts list of null number', () => {
+      const dao = new DummyDao('Dummy', { id: 'S', list: { type: 'L', schema: 'N' } });
+      const object = { id: '123', list: [null] };
+      const expected = {
+        id: { 'S': '123' }, list: { 'L': [{ 'N': '' }] }
+      };
+      expect(dao.objectToTypedItem(object)).to.deep.equal(expected);
+    });
   });
   describe('putItem', () => {
     beforeEach(() => {

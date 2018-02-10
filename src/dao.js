@@ -66,15 +66,20 @@ export default class DynamoDbDataAccess {
     let value;
     switch (type) {
       case 'N':
+        value = `${v || ''}`;
+        break;
       case 'S':
       default:
-        value = v;
+        value = v || '';
     }
     return ({ [type]: value });
   }
   objectToTypedItem(d, schema = this.schema) {
     let rv;
-    if (d instanceof Array) {
+    if (d === undefined || d === null) {
+      rv = this.castValue(d, schema);
+    }
+    else if (d instanceof Array) {
       const arraySchema = schema.schema;
       if (typeof arraySchema === 'object') {
         rv = d.map(i => ({ 'M': this.objectToTypedItem(i, schema.schema) }));
@@ -83,14 +88,17 @@ export default class DynamoDbDataAccess {
         rv = d.map(i => this.objectToTypedItem(i, schema.schema));
       }
     }
-    else if (typeof d === 'string') {
-      rv = this.castValue(d, schema);
-    }
     else if (typeof d === 'object') {
       rv = {};
       for (let v in schema) {
         rv[v] = this.typedValue(v, d[v], schema);
       }
+    }
+    else if (typeof d === 'string') {
+      rv = this.castValue(d, schema);
+    }
+    else if (typeof d === 'number') {
+      rv = this.castValue(d, schema);
     }
     return rv;
   }
