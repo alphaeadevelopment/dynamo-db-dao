@@ -148,6 +148,22 @@ describe('dynamo db dao', () => {
       };
       expect(dao.objectToTypedItem(object)).to.deep.equal(expected);
     });
+    it('converts null simple list', () => {
+      const dao = new DummyDao('Dummy', { id: 'S', list: { type: 'L', schema: 'N' } });
+      const object = { id: '123' };
+      const expected = {
+        id: { 'S': '123' }, list: { 'L': [] }
+      };
+      expect(dao.objectToTypedItem(object)).to.deep.equal(expected);
+    });
+    it('converts null complex list', () => {
+      const dao = new DummyDao('Dummy', { id: 'S', list: { type: 'L', schema: { name: 'S' } } });
+      const object = { id: '123' };
+      const expected = {
+        id: { 'S': '123' }, list: { 'L': [] }
+      };
+      expect(dao.objectToTypedItem(object)).to.deep.equal(expected);
+    });
   });
   describe('putItem', () => {
     beforeEach(() => {

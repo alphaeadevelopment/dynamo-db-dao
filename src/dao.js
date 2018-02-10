@@ -63,16 +63,34 @@ export default class DynamoDbDataAccess {
     return rv;
   }
   castValue(v, type) {
-    let value;
-    switch (type) {
-      case 'N':
-        value = `${v || ''}`;
-        break;
-      case 'S':
-      default:
-        value = v || '';
+    if (typeof type === 'object') {
+      switch (type.type) {
+        case 'L':
+          return this.castValue(v || [], type.schema);
+        default:
+          return v;
+      }
     }
-    return ({ [type]: value });
+    else if (v instanceof Array) {
+      return v;
+    }
+    else {
+      let value;
+      let returnType = type;
+      switch (type) {
+        case 'N':
+          value = `${v || ''}`;
+          break;
+        // case 'L':
+        //   value = this.castValue(v || [], type);
+        //   break;
+        case 'S':
+        default:
+          value = v || '';
+      }
+      const rv = ({ [returnType]: value });
+      return rv;
+    }
   }
   objectToTypedItem(d, schema = this.schema) {
     let rv;
