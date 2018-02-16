@@ -92,19 +92,19 @@ describe('dynamo db dao', () => {
       };
       expect(dao.objectToTypedItem(object)).to.deep.equal(expected);
     });
-    it('converts undefined to N:\'\'', () => {
+    it('converts undefined N', () => {
       const dao = new DummyDao('Dummy', simpleSchema);
       const object = { id: '123' };
       const expected = {
-        id: { 'S': '123' }, number: { 'N': '' }
+        id: { 'S': '123' }
       };
       expect(dao.objectToTypedItem(object)).to.deep.equal(expected);
     });
-    it('converts undefined to S:\'\'', () => {
+    it('converts undefined S', () => {
       const dao = new DummyDao('Dummy', simpleSchema);
       const object = { number: 123 };
       const expected = {
-        id: { 'S': '' }, number: { 'N': '123' }
+        number: { 'N': '123' }
       };
       expect(dao.objectToTypedItem(object)).to.deep.equal(expected);
     });
@@ -136,7 +136,7 @@ describe('dynamo db dao', () => {
       const dao = new DummyDao('Dummy', { id: 'S', list: { type: 'L', schema: 'S' } });
       const object = { id: '123', list: [null] };
       const expected = {
-        id: { 'S': '123' }, list: { 'L': [{ 'S': '' }] }
+        id: { 'S': '123' }, list: { 'L': [] }
       };
       expect(dao.objectToTypedItem(object)).to.deep.equal(expected);
     });
@@ -144,13 +144,29 @@ describe('dynamo db dao', () => {
       const dao = new DummyDao('Dummy', { id: 'S', list: { type: 'L', schema: 'N' } });
       const object = { id: '123', list: [null] };
       const expected = {
-        id: { 'S': '123' }, list: { 'L': [{ 'N': '' }] }
+        id: { 'S': '123' }, list: { 'L': [] }
       };
       expect(dao.objectToTypedItem(object)).to.deep.equal(expected);
     });
     it('converts null simple list', () => {
       const dao = new DummyDao('Dummy', { id: 'S', list: { type: 'L', schema: 'N' } });
       const object = { id: '123' };
+      const expected = {
+        id: { 'S': '123' },
+      };
+      expect(dao.objectToTypedItem(object)).to.deep.equal(expected);
+    });
+    it('converts empty simple list', () => {
+      const dao = new DummyDao('Dummy', { id: 'S', list: { type: 'L', schema: 'N' } });
+      const object = { id: '123', list: [] };
+      const expected = {
+        id: { 'S': '123' }, list: { 'L': [] }
+      };
+      expect(dao.objectToTypedItem(object)).to.deep.equal(expected);
+    });
+    it('converts empty complex list', () => {
+      const dao = new DummyDao('Dummy', { id: 'S', list: { type: 'L', schema: { name: 'S' } } });
+      const object = { id: '123', list: [] };
       const expected = {
         id: { 'S': '123' }, list: { 'L': [] }
       };
@@ -160,7 +176,33 @@ describe('dynamo db dao', () => {
       const dao = new DummyDao('Dummy', { id: 'S', list: { type: 'L', schema: { name: 'S' } } });
       const object = { id: '123' };
       const expected = {
-        id: { 'S': '123' }, list: { 'L': [] }
+        id: { 'S': '123' },
+      };
+      expect(dao.objectToTypedItem(object)).to.deep.equal(expected);
+    });
+    it('omits null simple values', () => {
+      const dao = new DummyDao('Dummy', { id: 'S', name: 'S' });
+      const object = { id: '123' };
+      const expected = {
+        id: { 'S': '123' }
+      };
+      expect(dao.objectToTypedItem(object)).to.deep.equal(expected);
+    });
+    it('omits null simple list', () => {
+      const dao = new DummyDao('Dummy', { id: 'S', list: { type: 'L', schema: 'S' } });
+      const object = { id: '123', list: ['abc', null] };
+      const expected = {
+        id: { 'S': '123' },
+        list: { 'L': [{ 'S': 'abc' }] },
+      };
+      expect(dao.objectToTypedItem(object)).to.deep.equal(expected);
+    });
+    it('omits null complex list', () => {
+      const dao = new DummyDao('Dummy', { id: 'S', list: { type: 'L', schema: { name: 'S' } } });
+      const object = { id: '123', list: [{ name: 'abc' }, null] };
+      const expected = {
+        id: { 'S': '123' },
+        list: { 'L': [{ 'M': { name: { 'S': 'abc' } } }] }
       };
       expect(dao.objectToTypedItem(object)).to.deep.equal(expected);
     });

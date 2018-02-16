@@ -1,8 +1,11 @@
 import AWS from 'aws-sdk';
 import uuid from 'uuid/v1';
 import keys from 'lodash/keys';
+import filter from 'lodash/filter';
 
 const id = uuid();
+
+console.log('In DAO');
 
 export default class DynamoDbDataAccess {
   constructor(
@@ -19,6 +22,7 @@ export default class DynamoDbDataAccess {
   }
   typedValue(key, value, schema = this.schema) {
     const type = schema[key];
+    if (!value) return;
     if (typeof type === 'object') {
       const rv = ({ [type.type]: this.objectToTypedItem(value, type) });
       return rv;
@@ -95,21 +99,27 @@ export default class DynamoDbDataAccess {
   objectToTypedItem(d, schema = this.schema) {
     let rv;
     if (d === undefined || d === null) {
-      rv = this.castValue(d, schema);
+      rv = null; // this.castValue(d, schema);
     }
     else if (d instanceof Array) {
       const arraySchema = schema.schema;
       if (typeof arraySchema === 'object') {
-        rv = d.map(i => ({ 'M': this.objectToTypedItem(i, schema.schema) }));
+        rv = filter(d.map(i => {
+          const value = this.objectToTypedItem(i, schema.schema);
+          return value == null ? null : ({ 'M': value });
+        }), v => v !== null && v !== undefined);
       }
       else {
-        rv = d.map(i => this.objectToTypedItem(i, schema.schema));
+        rv = filter(d.map(i => this.objectToTypedItem(i, schema.schema)), v => v !== null && v !== undefined);
       }
     }
     else if (typeof d === 'object') {
       rv = {};
       for (let v in schema) {
-        rv[v] = this.typedValue(v, d[v], schema);
+        const typedValue = this.typedValue(v, d[v], schema);
+        if (typedValue !== null && typedValue !== undefined) {
+          rv[v] = typedValue;
+        }
       }
     }
     else if (typeof d === 'string') {
