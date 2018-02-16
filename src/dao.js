@@ -67,50 +67,55 @@ export default class DynamoDbDataAccess {
     return rv;
   }
   castValue(v, type) {
-    if (typeof type === 'object') {
+    let rv;
+    if (v === null || v === undefined) {
+      rv = { 'NULL': true };
+    }
+    else if (typeof type === 'object') {
       switch (type.type) {
         case 'L':
-          return this.castValue(v || [], type.schema);
+          rv = this.castValue(v || [], type.schema);
+          break;
         default:
-          return v;
+          rv = v;
       }
     }
     else if (v instanceof Array) {
-      return v;
+      rv = v;
     }
     else {
       let value;
       let returnType = type;
       switch (type) {
         case 'N':
-          value = `${v || ''}`;
+          value = `${v}`;
           break;
         // case 'L':
         //   value = this.castValue(v || [], type);
         //   break;
         case 'S':
         default:
-          value = v || '';
+          value = v;
       }
-      const rv = ({ [returnType]: value });
-      return rv;
+      rv = ({ [returnType]: value });
     }
+    return rv;
   }
   objectToTypedItem(d, schema = this.schema) {
     let rv;
     if (d === undefined || d === null) {
-      rv = null; // this.castValue(d, schema);
+      rv = { 'NULL': true }; // this.castValue(d, schema);
     }
     else if (d instanceof Array) {
       const arraySchema = schema.schema;
       if (typeof arraySchema === 'object') {
         rv = filter(d.map(i => {
           const value = this.objectToTypedItem(i, schema.schema);
-          return value == null ? null : ({ 'M': value });
+          return (value.NULL) ? value : ({ 'M': value });
         }), v => v !== null && v !== undefined);
       }
       else {
-        rv = filter(d.map(i => this.objectToTypedItem(i, schema.schema)), v => v !== null && v !== undefined);
+        rv = d.map(i => this.objectToTypedItem(i, schema.schema));
       }
     }
     else if (typeof d === 'object') {
@@ -205,6 +210,8 @@ export default class DynamoDbDataAccess {
         TableName: this.tablename,
         Item: this.objectToTypedItem({ ...d, [pk]: id }),
       }
+      console.log(JSON.stringify(d));
+      console.log(JSON.stringify(params.Item));
       this.dynamodb.putItem(params, (err, data) => {
         if (err) rej(err);
         else res(data);

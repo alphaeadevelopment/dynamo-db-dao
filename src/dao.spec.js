@@ -136,7 +136,7 @@ describe('dynamo db dao', () => {
       const dao = new DummyDao('Dummy', { id: 'S', list: { type: 'L', schema: 'S' } });
       const object = { id: '123', list: [null] };
       const expected = {
-        id: { 'S': '123' }, list: { 'L': [] }
+        id: { 'S': '123' }, list: { 'L': [{ 'NULL': true }] }
       };
       expect(dao.objectToTypedItem(object)).to.deep.equal(expected);
     });
@@ -144,7 +144,7 @@ describe('dynamo db dao', () => {
       const dao = new DummyDao('Dummy', { id: 'S', list: { type: 'L', schema: 'N' } });
       const object = { id: '123', list: [null] };
       const expected = {
-        id: { 'S': '123' }, list: { 'L': [] }
+        id: { 'S': '123' }, list: { 'L': [{ 'NULL': true }] }
       };
       expect(dao.objectToTypedItem(object)).to.deep.equal(expected);
     });
@@ -193,7 +193,7 @@ describe('dynamo db dao', () => {
       const object = { id: '123', list: ['abc', null] };
       const expected = {
         id: { 'S': '123' },
-        list: { 'L': [{ 'S': 'abc' }] },
+        list: { 'L': [{ 'S': 'abc' }, { 'NULL': true }] },
       };
       expect(dao.objectToTypedItem(object)).to.deep.equal(expected);
     });
@@ -202,7 +202,16 @@ describe('dynamo db dao', () => {
       const object = { id: '123', list: [{ name: 'abc' }, null] };
       const expected = {
         id: { 'S': '123' },
-        list: { 'L': [{ 'M': { name: { 'S': 'abc' } } }] }
+        list: { 'L': [{ 'M': { name: { 'S': 'abc' } } }, { 'NULL': true }] }
+      };
+      expect(dao.objectToTypedItem(object)).to.deep.equal(expected);
+    });
+    it('handles list of zero', () => {
+      const dao = new DummyDao('Dummy', { id: 'S', list: { type: 'L', schema: 'N' } });
+      const object = { id: '123', list: [0, 1] };
+      const expected = {
+        id: { 'S': '123' },
+        list: { 'L': [{ 'N': '0' }, { 'N': '1' }] }
       };
       expect(dao.objectToTypedItem(object)).to.deep.equal(expected);
     });
