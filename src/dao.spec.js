@@ -74,6 +74,34 @@ describe('dynamo db dao', () => {
       };
       expect(dao.typedValue('list', [{ name: 'Bob' }])).to.deep.equal(expected);
     });
+    it('converts map of object', () => {
+      const dao = new DummyDao('Dummy', { id: 'S', map: { type: 'M', schema: { name: 'S' } } });
+      const expected = {
+        'M': {
+          bob: {
+            'M': {
+              name: {
+                'S': 'Bob'
+              }
+            }
+          },
+        },
+      };
+      expect(JSON.stringify(dao.typedValue('map', { bob: { name: 'Bob' } }))).to.equal(JSON.stringify(expected));
+    });
+    it('converts map of string', () => {
+      const dao = new DummyDao('Dummy', { id: 'S', map: { type: 'M', schema: 'S' } });
+      const expected = {
+        'M': {
+          bob: {
+            'M': {
+              'S': 'Bob'
+            }
+          },
+        },
+      };
+      expect(JSON.stringify(dao.typedValue('map', { bob: 'Bob' }))).to.equal(JSON.stringify(expected));
+    });
   });
   describe('objectToTypedItem', () => {
     it('converts simple object', () => {
@@ -212,6 +240,28 @@ describe('dynamo db dao', () => {
       const expected = {
         id: { 'S': '123' },
         list: { 'L': [{ 'N': '0' }, { 'N': '1' }] }
+      };
+      expect(dao.objectToTypedItem(object)).to.deep.equal(expected);
+    });
+    it('handles map of string', () => {
+      const dao = new DummyDao('Dummy', { id: 'S', map: { type: 'M', schema: 'S' } });
+      const object = { id: '123', map: { bob: 'Bob' } };
+      const expected = {
+        id: { 'S': '123' },
+        map: {
+          'M': { bob: { M: { S: 'Bob' } } }
+        }
+      };
+      expect(dao.objectToTypedItem(object)).to.deep.equal(expected);
+    });
+    it('handles map of object', () => {
+      const dao = new DummyDao('Dummy', { id: 'S', map: { type: 'M', schema: { name: 'S' } } });
+      const object = { id: '123', map: { bob: { name: 'Bob' } } };
+      const expected = {
+        id: { 'S': '123' },
+        map: {
+          'M': { bob: { M: { name: { S: 'Bob' } } } }
+        }
       };
       expect(dao.objectToTypedItem(object)).to.deep.equal(expected);
     });

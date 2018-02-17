@@ -1,11 +1,10 @@
 import AWS from 'aws-sdk';
 import uuid from 'uuid/v1';
 import keys from 'lodash/keys';
+import mapValues from 'lodash/mapValues';
 import filter from 'lodash/filter';
 
 const id = uuid();
-
-console.log('In DAO');
 
 export default class DynamoDbDataAccess {
   constructor(
@@ -22,21 +21,23 @@ export default class DynamoDbDataAccess {
   }
   typedValue(key, value, schema = this.schema) {
     const type = schema[key];
-    if (!value) return;
-    if (typeof type === 'object') {
-      const rv = ({ [type.type]: this.objectToTypedItem(value, type) });
-      return rv;
+    let rv;
+    if (!value) rv = null;
+    else if (typeof type === 'object') {
+      rv = ({ [type.type]: this.objectToTypedItem(value, type) });
     }
-    let typedValue;
-    switch (type) {
-      case 'S':
-      case 'N':
-        typedValue = `${value || ''}`;
-        break;
-      default:
-        typedValue = value;
+    else {
+      let typedValue;
+      switch (type) {
+        case 'S':
+        case 'N':
+          typedValue = `${value || ''}`;
+          break;
+        default:
+          typedValue = value;
+      }
+      rv = ({ [type]: typedValue });
     }
-    const rv = ({ [type]: typedValue });
     return rv;
   }
   fieldFromValue(key, value) {
@@ -119,11 +120,16 @@ export default class DynamoDbDataAccess {
       }
     }
     else if (typeof d === 'object') {
-      rv = {};
-      for (let v in schema) {
-        const typedValue = this.typedValue(v, d[v], schema);
-        if (typedValue !== null && typedValue !== undefined) {
-          rv[v] = typedValue;
+      if (schema.schema && schema.type === 'M') {
+        rv = mapValues(d, i => ({ M: this.objectToTypedItem(i, schema.schema) }));
+      }
+      else {
+        rv = {};
+        for (let v in schema) {
+          const typedValue = this.typedValue(v, d[v], schema);
+          if (typedValue !== null && typedValue !== undefined) {
+            rv[v] = typedValue;
+          }
         }
       }
     }
@@ -197,7 +203,6 @@ export default class DynamoDbDataAccess {
         Key: this.objectToTypedItem({ ...d, [pk]: id }),
       }
       this.dynamodb.updateItem(params, (err, data) => {
-        console.log(err, data);
         if (err) rej(err);
         else res(data);
       })
@@ -210,8 +215,6 @@ export default class DynamoDbDataAccess {
         TableName: this.tablename,
         Item: this.objectToTypedItem({ ...d, [pk]: id }),
       }
-      console.log(JSON.stringify(d));
-      console.log(JSON.stringify(params.Item));
       this.dynamodb.putItem(params, (err, data) => {
         if (err) rej(err);
         else res(data);
