@@ -1,9 +1,9 @@
 import AWS from 'aws-sdk';
 import uuid from 'uuid/v1';
 import keys from 'lodash/keys';
+import ObjectHelper from './object-helper';
 import mapValues from 'lodash/mapValues';
 import filter from 'lodash/filter';
-import ObjectHelper from './object-helper';
 
 const id = uuid();
 
@@ -64,7 +64,7 @@ export default class DynamoDbDataAccess {
         ExclusiveStartKey: pageKey ? this.oh.fieldFromValue(this.pk, pageKey) : pageKey,
         Limit: limit,
       }
-      dynamodb.scan(params, (err, data) => {
+      this.dynamodb.scan(params, (err, data) => {
         if (err) {
           rej(err);
           return;
