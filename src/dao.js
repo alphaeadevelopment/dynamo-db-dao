@@ -12,12 +12,12 @@ export default class DynamoDbDataAccess {
     schema,
     options = {},
   ) {
-    const { pk = 'id', sortKey, dynamodb = new AWS.DynamoDB({ region: 'eu-west-1' }) } = options;
+    const { pk = 'id', sortKey } = options;
     this.schema = schema;
     this.tablename = tablename;
     this.pk = pk;
     this.sortKey = sortKey;
-    this.dynamodb = dynamodb;
+    this.dynamodb = new AWS.DynamoDB({ region: 'eu-west-1' });
   }
   typedValue(key, value, schema = this.schema) {
     const type = schema[key];
@@ -232,6 +232,19 @@ export default class DynamoDbDataAccess {
       this.dynamodb.query(params, (e, data) => {
         if (e) rej(e);
         else res({ items: data.Items.map(i => this.typedItemToObject(i)) });
+      });
+    });
+  }
+  delete(id) {
+    return new Promise((res, rej) => {
+      const pk = this.pk;
+      const params = {
+        TableName: this.tablename,
+        Key: this.objectToTypedItem({ [pk]: id }),
+      }
+      this.dynamodb.deleteItem(params, (e, data) => {
+        if (e) rej(e);
+        else res(data);
       });
     });
   }
