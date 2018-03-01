@@ -23,10 +23,7 @@ var config = {
   resolve: {
     extensions: ['.js', '.jsx'],
   },
-  externals: {
-    'aws-sdk': 'aws-sdk',
-    'uuid/v1': 'uuid/v1',
-  },
+  externals: /^(aws-sdk|uuid\/v1|lodash(\/.*)?)$/,
   plugins: [
   ],
   target: 'node'
